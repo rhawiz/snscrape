@@ -670,7 +670,7 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
         if self._guestTokenManager.token is None:
             _logger.info('Retrieving guest token')
             r = self._get(self._baseUrl if url is None else url, headers={'User-Agent': self._userAgent},
-                          responseOkCallback=self._check_guest_token_response)
+                          responseOkCallback=self._check_guest_token_response, ignore_proxies=True)
             if (match := re.search(
                     r'document\.cookie = decodeURIComponent\("gt=(\d+); Max-Age=10800; Domain=\.twitter\.com; Path=/; Secure"\);',
                     r.text)):
@@ -720,7 +720,10 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
         if proxies and 'https' in proxies and 'https' not in proxies['https']:
             proxies['https'] = f'https://{proxies["https"]}'
 
-        r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies['https'])
+        if proxies and 'http' in proxies and 'http' not in proxies['http']:
+            proxies['http'] = f'http://{proxies["http"]}'
+
+        r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies['http'])
         # r = self._get(endpoint, params = params, headers = self._apiHeaders, responseOkCallback = self._check_api_response)
         try:
             obj = r.json()
@@ -1901,8 +1904,8 @@ class TwitterTrendsScraper(_TwitterAPIScraper):
 
 if __name__ == '__main__':
     scraper = TwitterSearchScraper('(from:financialjuice) until:2023-01-11 since:2023-01-10', proxies={
-        'http': '177.234.238.36:8080',
-        'https': '177.234.238.36:8080'
+        'http': 'dc.smartproxy.com:10001',
+        'https': 'dc.smartproxy.com:10001'
     }, retries=0,
                                    top=True)
 
