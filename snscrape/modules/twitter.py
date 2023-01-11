@@ -26,6 +26,9 @@ import random
 import logging
 import os
 import re
+
+import httpx
+
 import snscrape.base
 import string
 import time
@@ -688,7 +691,8 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
 		self._ensure_guest_token()
 		if apiType is _TwitterAPIType.GRAPHQL:
 			params = urllib.parse.urlencode({'variables': json.dumps(params, separators = (',', ':'))}, quote_via = urllib.parse.quote)
-		r = self._get(endpoint, params = params, headers = self._apiHeaders, responseOkCallback = self._check_api_response)
+		r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=self._proxies)
+		# r = self._get(endpoint, params = params, headers = self._apiHeaders, responseOkCallback = self._check_api_response)
 		try:
 			obj = r.json()
 		except json.JSONDecodeError as e:
@@ -1769,3 +1773,10 @@ class TwitterTrendsScraper(_TwitterAPIScraper):
 				for item in entry['content']['timelineModule']['items']:
 					trend = item['item']['content']['trend']
 					yield Trend(name = trend['name'], metaDescription = trend['trendMetadata'].get('metaDescription'), domainContext = trend['trendMetadata']['domainContext'])
+
+if __name__ == '__main__':
+    scraper = TwitterSearchScraper('(from:financialjuice) until:2023-01-11 since:2023-01-10', proxies=None, retries=0,
+                                   top=True)
+
+    for tweet in scraper.get_items():
+        print(tweet)

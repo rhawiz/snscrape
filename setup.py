@@ -29,6 +29,7 @@ setuptools.setup(
 		'beautifulsoup4',
 		'pytz; python_version < "3.9.0"',
 		'filelock',
+		'httpx'
 	],
 	python_requires = '~=3.8',
 	extras_require = {
