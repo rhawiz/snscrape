@@ -691,7 +691,13 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
 		self._ensure_guest_token()
 		if apiType is _TwitterAPIType.GRAPHQL:
 			params = urllib.parse.urlencode({'variables': json.dumps(params, separators = (',', ':'))}, quote_via = urllib.parse.quote)
-		r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=self._proxies)
+		proxies = self._proxies
+
+		if proxies and 'http' in proxies and 'http' not in  proxies['http']:
+			proxies['http'] = f'http://{proxies["http"]}'
+		if proxies and 'https' in proxies and 'https' not in  proxies['https']:
+			proxies['https'] = f'http://{proxies["https"]}'
+		r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies)
 		# r = self._get(endpoint, params = params, headers = self._apiHeaders, responseOkCallback = self._check_api_response)
 		try:
 			obj = r.json()
@@ -1775,7 +1781,10 @@ class TwitterTrendsScraper(_TwitterAPIScraper):
 					yield Trend(name = trend['name'], metaDescription = trend['trendMetadata'].get('metaDescription'), domainContext = trend['trendMetadata']['domainContext'])
 
 if __name__ == '__main__':
-    scraper = TwitterSearchScraper('(from:financialjuice) until:2023-01-11 since:2023-01-10', proxies=None, retries=0,
+    scraper = TwitterSearchScraper('(from:financialjuice) until:2023-01-11 since:2023-01-10', proxies={
+		'http': 'http://177.234.238.36:8080',
+		'https': 'https://177.234.238.36:8080'
+	}, retries=0,
                                    top=True)
 
     for tweet in scraper.get_items():
