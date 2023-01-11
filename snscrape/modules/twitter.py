@@ -834,6 +834,8 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
 
     def _v2_timeline_instructions_to_tweets(self, obj, includeConversationThreads=False):
         # No data format test, just a hard and loud crash if anything's wrong :-)
+        if 'timeline' not in obj:
+            raise Exception(f"INVALID RESPONSE WITH PROXY {self._proxies['http']} ==> {obj}")
         for instruction in obj['timeline']['instructions']:
             if 'addEntries' in instruction:
                 entries = instruction['addEntries']['entries']
