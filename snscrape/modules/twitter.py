@@ -696,7 +696,7 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
 		if proxies and 'http' in proxies and 'http' not in  proxies['http']:
 			proxies['http'] = f'http://{proxies["http"]}'
 		if proxies and 'https' in proxies and 'https' not in  proxies['https']:
-			proxies['https'] = f'http://{proxies["https"]}'
+			proxies['https'] = f'https://{proxies["https"]}'
 		r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies)
 		# r = self._get(endpoint, params = params, headers = self._apiHeaders, responseOkCallback = self._check_api_response)
 		try:
