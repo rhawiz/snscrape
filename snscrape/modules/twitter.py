@@ -723,7 +723,7 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
         if proxies and 'http' in proxies and 'http' not in proxies['http']:
             proxies['http'] = f'http://{proxies["http"]}'
 
-        r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies['http'])
+        r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies['http'] if proxies else None)
         # r = self._get(endpoint, params = params, headers = self._apiHeaders, responseOkCallback = self._check_api_response)
         try:
             obj = r.json()
@@ -834,6 +834,7 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
 
     def _v2_timeline_instructions_to_tweets(self, obj, includeConversationThreads=False):
         # No data format test, just a hard and loud crash if anything's wrong :-)
+        print(obj)
         for instruction in obj['timeline']['instructions']:
             if 'addEntries' in instruction:
                 entries = instruction['addEntries']['entries']
@@ -1903,11 +1904,9 @@ class TwitterTrendsScraper(_TwitterAPIScraper):
 
 
 if __name__ == '__main__':
-    scraper = TwitterSearchScraper('(from:financialjuice) until:2023-01-11 since:2023-01-10', proxies={
-        'http': 'dc.smartproxy.com:10001',
-        'https': 'dc.smartproxy.com:10001'
-    }, retries=0,
+    scraper = TwitterSearchScraper('(from:financialjuice) until:2021-09-13 since:2021-09-12', retries=0,
                                    top=True)
+
 
     for tweet in scraper.get_items():
         print(tweet)
