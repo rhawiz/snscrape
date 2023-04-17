@@ -27,6 +27,7 @@ import os
 import re
 
 import httpx
+from retry import retry
 
 import snscrape.base
 import string
@@ -710,6 +711,10 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
             return False, 'non-200 status code'
         return True, None
 
+    @retry(tries=16)
+    def _httpx_get(self, url, params, headers, proxies):
+        return httpx.get(url=url, params=params, headers=headers, proxies=proxies)
+
     def _get_api_data(self, endpoint, apiType, params):
         self._ensure_guest_token()
         if apiType is _TwitterAPIType.GRAPHQL:
@@ -723,7 +728,8 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
         if proxies and 'http' in proxies and 'http' not in proxies['http']:
             proxies['http'] = f'http://{proxies["http"]}'
 
-        r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies['http'] if proxies else None)
+        r = self._httpx_get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies['http'] if proxies else proxies)
+        # r = httpx.get(url=endpoint, params=params, headers=self._apiHeaders, proxies=proxies['http'] if proxies else None)
         # r = self._get(endpoint, params = params, headers = self._apiHeaders, responseOkCallback = self._check_api_response)
         try:
             obj = r.json()
