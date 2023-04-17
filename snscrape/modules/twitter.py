@@ -899,10 +899,10 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
         kwargs['conversationId'] = tweet['conversation_id'] if 'conversation_id' in tweet else int(
             tweet['conversation_id_str'])
         kwargs['lang'] = tweet['lang']
-        kwargs['source'] = tweet['source']
-        if (match := re.search(r'href=[\'"]?([^\'" >]+)', tweet['source'])):
+        kwargs['source'] = tweet['source'] if 'source' in tweet else None
+        if (match := re.search(r'href=[\'"]?([^\'" >]+)', tweet.get('source', ''))):
             kwargs['sourceUrl'] = match.group(1)
-        if (match := re.search(r'>([^<]*)<', tweet['source'])):
+        if (match := re.search(r'>([^<]*)<', tweet.get('source', ''))):
             kwargs['sourceLabel'] = match.group(1)
         if 'extended_entities' in tweet and 'media' in tweet['extended_entities']:
             media = []
@@ -947,7 +947,7 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
                                     tweet['place']['place_type'], tweet['place']['country'],
                                     tweet['place']['country_code'])
             if 'coordinates' not in kwargs and tweet['place'].get('bounding_box') and (
-            coords := tweet['place']['bounding_box']['coordinates']) and coords[0] and len(coords[0][0]) == 2:
+                    coords := tweet['place']['bounding_box']['coordinates']) and coords[0] and len(coords[0][0]) == 2:
                 # Take the first (longitude, latitude) couple of the "place square"
                 kwargs['coordinates'] = Coordinates(coords[0][0][0], coords[0][0][1])
         if tweet['entities'].get('hashtags'):
@@ -1247,7 +1247,7 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
                     return
                 kwargs['type'] = unifiedCardType
             elif set(c['type'] for c in o['component_objects'].values()) not in (
-            {'media', 'twitter_list_details'}, {'media', 'community_details'}):
+                    {'media', 'twitter_list_details'}, {'media', 'community_details'}):
                 _logger.warning(f'Unsupported unified_card type on tweet {tweetId}')
                 return
 
@@ -1478,7 +1478,7 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
         kwargs['profileImageUrl'] = user['profile_image_url_https']
         kwargs['profileBannerUrl'] = user.get('profile_banner_url')
         if 'ext' in user and 'highlightedLabel' in user['ext'] and (
-        label := user['ext']['highlightedLabel']['r']['ok'].get('label')):
+                label := user['ext']['highlightedLabel']['r']['ok'].get('label')):
             kwargs['label'] = self._user_label_to_user_label(label)
         return User(**kwargs)
 
@@ -1905,9 +1905,9 @@ class TwitterTrendsScraper(_TwitterAPIScraper):
 
 
 if __name__ == '__main__':
-    scraper = TwitterSearchScraper('(from:financialjuice) until:2021-09-13 since:2021-09-12', retries=0,
-                                   top=True)
-
+    logging.basicConfig(level=logging.INFO)
+    scraper = TwitterSearchScraper('(from:elonmusk) until:2021-09-13 since:2021-09-12', retries=0,
+                                   top=False, proxies=None)
 
     for tweet in scraper.get_items():
         print(tweet)
