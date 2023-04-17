@@ -773,7 +773,8 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
             elif apiType is _TwitterAPIType.GRAPHQL:
                 if 'user' in obj['data']:
                     # UserTweets, UserTweetsAndReplies
-                    instructions = obj['data']['user']['result']['timeline']['timeline']['instructions']
+                    instructions = obj['data']['user']['result']
+                    instructions = instructions['timeline']['timeline']['instructions'] if 'timeline' in instructions else []
                 else:
                     # TweetDetail
                     instructions = obj['data'].get('threaded_conversation_with_injections', {}).get('instructions', [])
