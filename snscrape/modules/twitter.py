@@ -1713,7 +1713,8 @@ class TwitterProfileScraper(TwitterUserScraper):
         gotPinned = False
         for obj in self._iter_api_data('https://twitter.com/i/api/graphql/BSKxQ9_IaCoVyIvQHQROIQ/UserTweetsAndReplies',
                                        _TwitterAPIType.GRAPHQL, variables, paginationVariables):
-            instructions = obj['data']['user']['result']['timeline']['timeline']['instructions']
+            instructions = obj['data']['user']['result']
+            instructions = instructions['timeline']['timeline']['instructions'] if 'timeline' in instructions else []
             if not gotPinned:
                 for instruction in instructions:
                     if instruction['type'] == 'TimelinePinEntry':
