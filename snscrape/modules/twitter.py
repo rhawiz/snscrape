@@ -1415,11 +1415,11 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
             for entry in instruction['entries']:
                 if entry['entryId'].startswith('tweet-'):
                     if entry['content']['entryType'] == 'TimelineTimelineItem' and entry['content']['itemContent'][
-                        'itemType'] == 'TimelineTweet':
+                        'itemType'] == 'TimelineTweet' and 'result' in entry['content']['itemContent']['tweet_results']:
                         yield self._graphql_timeline_tweet_item_result_to_tweet(
                             entry['content']['itemContent']['tweet_results']['result'])
                     else:
-                        logger.warning('Got unrecognised timeline tweet item(s)')
+                        _logger.warning('Got unrecognised timeline tweet item(s)')
                 elif includeConversationThreads and entry['entryId'].startswith(
                         'conversationthread-'):  # TODO show more cursor?
                     for item in entry['content']['items']:
