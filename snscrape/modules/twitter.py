@@ -712,8 +712,8 @@ class _TwitterAPIScraper(snscrape.base.Scraper):
         return True, None
 
     @retry(tries=16)
-    def _httpx_get(self, url, params, headers, proxies):
-        return httpx.get(url=url, params=params, headers=headers, proxies=proxies)
+    def _httpx_get(self, url, params, headers, proxies, timeout=16):
+        return httpx.get(url=url, params=params, headers=headers, timeout=timeout, proxies=proxies)
 
     def _get_api_data(self, endpoint, apiType, params):
         self._ensure_guest_token()
